@@ -6,6 +6,8 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Relative base so the build works on GitHub Pages (/fillingmeals/) or any other host.
+  base: './',
   plugins: [
     vue(),
     vueDevTools(),
