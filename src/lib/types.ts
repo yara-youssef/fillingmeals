@@ -8,5 +8,7 @@ export interface Recipe {
   ingredients: string[]
   method: string
   tip: string
+  /** Optional link to a photo of the dish. */
+  image?: string
   source: 'book' | 'mine'
 }

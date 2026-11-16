@@ -125,3 +125,18 @@ main { max-width: 1000px; margin: 0 auto; padding: 1.25rem 16px 3rem; }
 .fav.on { border-color: var(--fav); }
 .tag.fav-tag.on { background: var(--fav); border-color: var(--fav); }
 .brand { display: inline-flex; align-items: center; gap: 0.5rem; }
+
+/* pictures */
+.card.has-img { padding-top: 0; overflow: hidden; }
+.thumb {
+  /* bleed to the card edges: cancel the card's left (1.1rem) and right (2.8rem, room for the heart) padding */
+  display: block; width: auto; align-self: stretch; margin: 0 -2.8rem 0.6rem -1.1rem; max-width: none;
+  aspect-ratio: 16 / 10; object-fit: cover; background: var(--accent-soft);
+}
+.cell .heart { background: color-mix(in srgb, var(--surface) 85%, transparent); }
+.hero {
+  display: block; width: 100%; max-height: 420px; object-fit: cover;
+  border-radius: 16px; margin: 0.8rem 0 0.4rem; background: var(--accent-soft);
+}
+.img-preview img { max-width: 260px; max-height: 180px; border-radius: 10px; object-fit: cover; border: 1px solid var(--line); }
+.field-error { color: var(--danger); font-size: 0.9rem; margin: -0.4rem 0 0; }
