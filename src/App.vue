@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { store, upsert, remove, setBookRecipes, exportJson, importJson } from '@/lib/store'
+import { store, upsert, remove, setBookRecipes, exportJson, importJson, isFavorite, toggleFavorite } from '@/lib/store'
 import { search } from '@/lib/search'
 import type { Recipe } from '@/lib/types'
 import RecipeForm from '@/components/RecipeForm.vue'
 import RecipeView from '@/components/RecipeView.vue'
+import logoUrl from '@/assets/logo.svg'
 
 // --- simple hash routing: #/ , #/r/<id> , #/new , #/edit/<id>
 const route = ref(location.hash)
@@ -36,8 +37,11 @@ const categories = computed(() => {
   store.recipes.forEach((r) => r.category && seen.add(r.category))
   return [...seen]
 })
+const FAVORITES = '♥ Favorites'
 const hits = computed(() =>
-  search(store.recipes, query.value).filter((h) => !category.value || h.recipe.category === category.value),
+  search(store.recipes, query.value).filter((h) =>
+    category.value === FAVORITES ? isFavorite(h.recipe.id) : !category.value || h.recipe.category === category.value,
+  ),
 )
 const hasBook = computed(() => store.recipes.some((r) => r.source === 'book'))
 
@@ -101,7 +105,7 @@ const pickTag = (t: string) => (category.value = category.value === t ? '' : t)
 
 <template>
   <header class="top">
-    <a href="#/" class="brand"><span class="logo">🥣</span> Filling Meals</a>
+    <a href="#/" class="brand"><img :src="logoUrl" alt="" class="logo" width="30" height="30" /> Filling Meals</a>
     <button @click="go('#/new')">+ Add recipe</button>
   </header>
 
@@ -137,6 +141,9 @@ const pickTag = (t: string) => (category.value = category.value === t ? '' : t)
       </div>
       <div v-if="categories.length" class="tags">
         <button class="tag" :class="{ on: !category }" @click="category = ''">All</button>
+        <button class="tag fav-tag" :class="{ on: category === FAVORITES }" @click="pickTag(FAVORITES)">
+          {{ FAVORITES }} ({{ store.favorites.length }})
+        </button>
         <button v-for="c in categories" :key="c" class="tag" :class="{ on: category === c }" @click="pickTag(c)">
           {{ c }}
         </button>
@@ -159,7 +166,16 @@ const pickTag = (t: string) => (category.value = category.value === t ? '' : t)
         {{ hits.length }} {{ hits.length === 1 ? 'recipe' : 'recipes' }}<span v-if="query"> for “{{ query }}”</span>
       </p>
       <ul class="grid">
-        <li v-for="h in hits" :key="h.recipe.id">
+        <li v-for="h in hits" :key="h.recipe.id" class="cell">
+          <button
+            class="heart"
+            :class="{ on: isFavorite(h.recipe.id) }"
+            :aria-pressed="isFavorite(h.recipe.id)"
+            :aria-label="isFavorite(h.recipe.id) ? `Remove ${h.recipe.title} from favorites` : `Add ${h.recipe.title} to favorites`"
+            @click="toggleFavorite(h.recipe.id)"
+          >
+            {{ isFavorite(h.recipe.id) ? '♥' : '♡' }}
+          </button>
           <a :href="`#/r/${encodeURIComponent(h.recipe.id)}`" class="card">
             <span class="eyebrow">{{ h.recipe.category }}<span v-if="h.recipe.source === 'mine'"> · Mine</span></span>
             <strong>{{ h.recipe.title }}</strong>
@@ -173,7 +189,10 @@ const pickTag = (t: string) => (category.value = category.value === t ? '' : t)
           </a>
         </li>
       </ul>
-      <p v-if="store.recipes.length && !hits.length" class="empty">
+      <p v-if="store.recipes.length && !hits.length && category === FAVORITES && !query" class="empty">
+        No favorites yet. Tap the ♡ on any recipe to save it here.
+      </p>
+      <p v-else-if="store.recipes.length && !hits.length" class="empty">
         Nothing matches. <a href="#/new">Add a recipe?</a>
       </p>
 

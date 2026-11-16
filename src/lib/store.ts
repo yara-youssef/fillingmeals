@@ -13,7 +13,37 @@ function load(): Recipe[] {
   }
 }
 
-export const store = reactive({ recipes: load(), saveError: '' })
+const FAV_KEY = 'filling-meals-favorites-v1'
+
+function loadFavorites(): string[] {
+  try {
+    const data = JSON.parse(localStorage.getItem(FAV_KEY) ?? '[]')
+    return Array.isArray(data) ? data.filter((x) => typeof x === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+export const store = reactive({ recipes: load(), favorites: loadFavorites(), saveError: '' })
+
+// Favorites are kept as a separate list of recipe ids, so re-importing the book keeps them.
+watch(
+  () => store.favorites,
+  (ids) => {
+    try {
+      localStorage.setItem(FAV_KEY, JSON.stringify(ids))
+    } catch {
+      store.saveError = 'Could not save favorites to this browser.'
+    }
+  },
+  { deep: true },
+)
+
+export const isFavorite = (id: string) => store.favorites.includes(id)
+
+export function toggleFavorite(id: string) {
+  store.favorites = isFavorite(id) ? store.favorites.filter((x) => x !== id) : [...store.favorites, id]
+}
 
 watch(
   () => store.recipes,
@@ -38,6 +68,7 @@ export function upsert(r: Recipe) {
 
 export function remove(id: string) {
   store.recipes = store.recipes.filter((r) => r.id !== id)
+  store.favorites = store.favorites.filter((x) => x !== id)
 }
 
 /** Replace the book recipes, keeping the user's own ones. */
@@ -46,13 +77,17 @@ export function setBookRecipes(book: Recipe[]) {
 }
 
 export function exportJson(): string {
-  return JSON.stringify({ app: 'filling-meals', version: 1, recipes: store.recipes }, null, 2)
+  return JSON.stringify({ app: 'filling-meals', version: 1, recipes: store.recipes, favorites: store.favorites }, null, 2)
 }
 
 export function importJson(text: string): number {
   const data = JSON.parse(text)
   const list: unknown = Array.isArray(data) ? data : data?.recipes
   if (!Array.isArray(list)) throw new Error('This file does not contain recipes.')
+  if (Array.isArray(data?.favorites)) {
+    const ids = (data.favorites as unknown[]).filter((x): x is string => typeof x === 'string')
+    store.favorites = [...new Set([...store.favorites, ...ids])]
+  }
   let n = 0
   for (const x of list as Partial<Recipe>[]) {
     if (!x || typeof x.title !== 'string') continue

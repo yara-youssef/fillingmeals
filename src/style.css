@@ -7,6 +7,7 @@
   --accent: #c2410c;
   --accent-soft: #fdeee4;
   --danger: #b91c1c;
+  --fav: #db2777;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -19,6 +20,7 @@
     --accent: #fb923c;
     --accent-soft: #3a2a1e;
     --danger: #f87171;
+    --fav: #f472b6;
     color-scheme: dark;
   }
 }
@@ -51,6 +53,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   background: color-mix(in srgb, var(--bg) 90%, transparent);
   backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
 }
+.logo { border-radius: 8px; }
 .brand { font-weight: 800; font-size: 1.2rem; color: var(--text); text-decoration: none; }
 main { max-width: 1000px; margin: 0 auto; padding: 1.25rem 16px 3rem; }
 
@@ -106,3 +109,19 @@ main { max-width: 1000px; margin: 0 auto; padding: 1.25rem 16px 3rem; }
   .recipe .cols, .form .row { grid-template-columns: 1fr; gap: 0.5rem; }
   h2 { font-size: 1.4rem; }
 }
+
+/* favorites */
+.cell { position: relative; }
+.cell .card { padding-right: 2.8rem; }
+.heart {
+  position: absolute; top: 0.55rem; right: 0.55rem; z-index: 1;
+  width: 2.2rem; height: 2.2rem; padding: 0; border-radius: 50%;
+  background: transparent; border: 0; color: var(--muted); font-size: 1.35rem; line-height: 1;
+}
+.heart:hover { background: var(--accent-soft); color: var(--accent); }
+.heart.on, .fav.on { color: var(--fav); }
+.title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.fav { background: var(--surface); color: var(--text); border-color: var(--line); font-weight: 500; white-space: nowrap; }
+.fav.on { border-color: var(--fav); }
+.tag.fav-tag.on { background: var(--fav); border-color: var(--fav); }
+.brand { display: inline-flex; align-items: center; gap: 0.5rem; }

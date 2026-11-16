@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Recipe } from '@/lib/types'
+import { isFavorite, toggleFavorite } from '@/lib/store'
 defineProps<{ recipe: Recipe }>()
 const emit = defineEmits<{ edit: []; remove: []; back: [] }>()
 </script>
@@ -8,7 +9,18 @@ const emit = defineEmits<{ edit: []; remove: []; back: [] }>()
   <article class="recipe">
     <button class="link" @click="emit('back')">← All recipes</button>
     <p class="eyebrow">{{ recipe.category }}<span v-if="recipe.source === 'mine'"> · My recipe</span></p>
-    <h2>{{ recipe.title }}</h2>
+    <div class="title-row">
+      <h2>{{ recipe.title }}</h2>
+      <button
+        class="fav"
+        :class="{ on: isFavorite(recipe.id) }"
+        :aria-pressed="isFavorite(recipe.id)"
+        :title="isFavorite(recipe.id) ? 'Remove from favorites' : 'Add to favorites'"
+        @click="toggleFavorite(recipe.id)"
+      >
+        {{ isFavorite(recipe.id) ? '♥ Favorite' : '♡ Add to favorites' }}
+      </button>
+    </div>
     <p class="meta">
       <span v-if="recipe.servings">Serves {{ recipe.servings }}</span>
       <span v-if="recipe.time">{{ recipe.time }}</span>
