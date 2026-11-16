@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import type { Recipe } from '@/lib/types'
 import { isFavorite, toggleFavorite } from '@/lib/store'
-defineProps<{ recipe: Recipe }>()
+const props = defineProps<{ recipe: Recipe }>()
+const imgFailed = ref(false)
+watch(() => props.recipe.image, () => (imgFailed.value = false))
 const emit = defineEmits<{ edit: []; remove: []; back: [] }>()
 </script>
 
@@ -25,6 +28,14 @@ const emit = defineEmits<{ edit: []; remove: []; back: [] }>()
       <span v-if="recipe.servings">Serves {{ recipe.servings }}</span>
       <span v-if="recipe.time">{{ recipe.time }}</span>
     </p>
+    <img
+      v-if="recipe.image && !imgFailed"
+      :src="recipe.image"
+      :alt="recipe.title"
+      class="hero"
+      referrerpolicy="no-referrer"
+      @error="imgFailed = true"
+    />
     <p v-if="recipe.intro" class="intro">{{ recipe.intro }}</p>
     <div class="cols">
       <section v-if="recipe.ingredients.length">

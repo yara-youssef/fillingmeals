@@ -14,6 +14,9 @@ A small web app for searching and keeping recipes – including the recipes from
 - **Search:** type ingredients or names, e.g. `tofu` or `chicken spinach`. Every word must match;
   title and ingredient matches rank first, and matching ingredients are shown on each card.
   Filter by chapter with the chips.
+- **Pictures:** any recipe can have an optional picture link (Edit → "Picture link"). It shows at the top of
+  the recipe and as a thumbnail on its card; recipes without one look as before. Picture links on book
+  recipes are kept when the book is re-imported.
 - **Add your own:** "+ Add recipe". Any recipe (book ones too) can be edited or deleted.
 - **Storage:** everything is saved in your browser (`localStorage`), so each device/browser has its own
   copy. Use **Export backup** / **Restore backup** to move recipes between devices.

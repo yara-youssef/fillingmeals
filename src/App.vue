@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { store, upsert, remove, setBookRecipes, exportJson, importJson, isFavorite, toggleFavorite } from '@/lib/store'
 import { search } from '@/lib/search'
 import type { Recipe } from '@/lib/types'
@@ -100,6 +100,7 @@ function del(r: Recipe) {
     go('#/')
   }
 }
+const brokenImages = reactive(new Set<string>())
 const pickTag = (t: string) => (category.value = category.value === t ? '' : t)
 </script>
 
@@ -176,7 +177,16 @@ const pickTag = (t: string) => (category.value = category.value === t ? '' : t)
           >
             {{ isFavorite(h.recipe.id) ? '♥' : '♡' }}
           </button>
-          <a :href="`#/r/${encodeURIComponent(h.recipe.id)}`" class="card">
+          <a :href="`#/r/${encodeURIComponent(h.recipe.id)}`" class="card" :class="{ 'has-img': h.recipe.image && !brokenImages.has(h.recipe.id) }">
+            <img
+              v-if="h.recipe.image && !brokenImages.has(h.recipe.id)"
+              :src="h.recipe.image"
+              alt=""
+              class="thumb"
+              loading="lazy"
+              referrerpolicy="no-referrer"
+              @error="brokenImages.add(h.recipe.id)"
+            />
             <span class="eyebrow">{{ h.recipe.category }}<span v-if="h.recipe.source === 'mine'"> · Mine</span></span>
             <strong>{{ h.recipe.title }}</strong>
             <span class="meta">

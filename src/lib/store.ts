@@ -73,7 +73,22 @@ export function remove(id: string) {
 
 /** Replace the book recipes, keeping the user's own ones. */
 export function setBookRecipes(book: Recipe[]) {
-  store.recipes = [...store.recipes.filter((r) => r.source !== 'book'), ...book]
+  // Keep any photo links you added to book recipes when the book is imported again.
+  const images = new Map(store.recipes.filter((r) => r.source === 'book' && r.image).map((r) => [r.id, r.image]))
+  const merged = book.map((r) => (images.has(r.id) ? { ...r, image: images.get(r.id) } : r))
+  store.recipes = [...store.recipes.filter((r) => r.source !== 'book'), ...merged]
+}
+
+/** Only allow web links (http/https) as picture sources. */
+export function cleanImageUrl(url: unknown): string {
+  if (typeof url !== 'string') return ''
+  const u = url.trim()
+  try {
+    const parsed = new URL(u)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? u : ''
+  } catch {
+    return ''
+  }
 }
 
 export function exportJson(): string {
@@ -101,6 +116,7 @@ export function importJson(text: string): number {
       ingredients: Array.isArray(x.ingredients) ? x.ingredients.map(String) : [],
       method: x.method ?? '',
       tip: x.tip ?? '',
+      image: cleanImageUrl(x.image) || undefined,
       source: x.source === 'book' ? 'book' : 'mine',
     })
     n++
